@@ -1,21 +1,8 @@
 # .readthedocs.yml
-# Read the Docs configuration file for MkDocs
-# See https://docs.readthedocs.io/en/stable/config-file/v2.html for details
+# Read the Docs configuration for MkDocs
+# See https://docs.readthedocs.io/en/stable/config-file/v2.html
 
 version: 2
-
-# Set the documentation type to MkDocs
-mkdocs:
-  configuration: mkdocs.yml
-  fail_on_warning: false
-
-# Python environment configuration
-python:
-  install:
-    - requirements: docs/requirements.txt
-  
-  # Set Python version
-  version: "3.10"
 
 # Build settings
 build:
@@ -25,6 +12,17 @@ build:
   jobs:
     post_install:
       - pip install -r docs/requirements.txt
+
+# Documentation builder
+doc_types:
+  mkdocs:
+    configuration: mkdocs.yml
+    fail_on_warning: false
+
+# Python environment
+python:
+  install:
+    - requirements: docs/requirements.txt
 
 # General settings
 language: en
