@@ -11,9 +11,11 @@ mkdocs:
 
 # Python environment configuration
 python:
-  version: 3.10
   install:
     - requirements: docs/requirements.txt
+  
+  # Set Python version
+  version: "3.10"
 
 # Build settings
 build:
