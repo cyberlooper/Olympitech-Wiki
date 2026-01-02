@@ -9,20 +9,16 @@ build:
   os: ubuntu-22.04
   tools:
     python: "3.10"
-  jobs:
-    post_install:
-      - pip install -r docs/requirements.txt
-
-# Documentation builder
-doc_types:
-  mkdocs:
-    configuration: mkdocs.yml
-    fail_on_warning: false
 
 # Python environment
 python:
   install:
     - requirements: docs/requirements.txt
+
+# MkDocs configuration
+mkdocs:
+  configuration: mkdocs.yml
+  fail_on_warning: false
 
 # General settings
 language: en
