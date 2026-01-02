@@ -1,0 +1,43 @@
+site_name: Olympitech Wiki
+site_url: https://olympitech-wiki.readthedocs.io/
+repo_url: https://github.com/cyberlooper/Olympitech-Wiki
+
+theme:
+  name: readthedocs
+  highlightjs: true
+  include_search_page: false
+  search_index_only: true
+
+# Navigation
+nav:
+  - Home: index.md
+  - JanusMCD: JanusMCD.md
+  - TartarusPunishments: TartarusPunishments.md
+  - NyxPluginMasking: NyxPluginMasking.md
+  - AnankeWorldControl: AnankeWorldControl.md
+
+# Extensions
+markdown_extensions:
+  - admonition
+  - codehilite:
+      guess_lang: true
+  - toc:
+      permalink: true
+  - pymdownx.superfences
+  - pymdownx.highlight
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+
+# Customization
+extra_css:
+  - css/extra.css
+
+# Build options
+docs_dir: 'docs'
+site_dir: 'site'
+
+# Copyright
+copyright: Copyright &copy; 2025 Olympitech
