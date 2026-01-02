@@ -1,0 +1,63 @@
+# .readthedocs.yml
+# Read the Docs configuration file
+# See https://docs.readthedocs.io/en/stable/config-file/v2.html for details
+
+# Required
+version: 2
+
+# Build documentation in the docs/ directory with MkDocs
+sphinx:
+  configuration: docs/conf.py
+
+# Optionally build your docs in additional formats such as PDF
+formats: all
+
+# Optionally set the version of Python and requirements required to build your docs
+python:
+  version: 3.10
+  install:
+    - requirements: docs/requirements.txt
+
+# Build documentation with MkDocs
+mkdocs:
+  configuration: mkdocs.yml
+  fail_on_warning: false
+
+# Optionally build documentation for specific versions, branches, or tags
+tags:
+  # Build from the latest tag
+  - pattern: "^[0-9]+\\."
+    # Use the latest version as the default
+    default: true
+
+# Optionally enable preview builds for pull requests
+build:
+  os: ubuntu-22.04
+  tools:
+    python: "3.10"
+  jobs:
+    post_install:
+      - pip install -r docs/requirements.txt
+
+# Optionally customize the build process
+# build:
+#   image: latest
+
+# Optionally include additional paths that need to be available when building
+do_not_build_docs: false
+
+# Optionally set the language of the project
+language: en
+
+# Optionally set the documentation type
+doc_type: mkdocs
+
+# Optionally include or exclude files from the build
+# include:
+#   - _build
+# exclude:
+#   - .git
+#   - .github
+#   - .gitignore
+#   - .readthedocs.yml
+#   - README.md
