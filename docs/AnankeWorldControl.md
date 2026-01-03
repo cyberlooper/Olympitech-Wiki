@@ -328,7 +328,63 @@ How IDs are detected:
 - **Nexo**: `com.nexomc.nexo.api.NexoBlocks` reflection hook
 - **PDC scanning on placement**: reads string IDs from `custom-blocks.pdc-keys`
 
-If no supported custom-block plugin is present and you don’t configure PDC keys, custom blocks will effectively be ignored.
+If no supported custom-block plugin is present and you don't configure PDC keys, custom blocks will effectively be ignored.
+
+### `weapons.yml` (weapon restrictions)
+
+Location: `plugins/AnankeWorldControl/weapons.yml`
+
+This file controls weapon restrictions, including disabling specific weapons and limiting the number of weapons a player can have in their inventory.
+
+#### Auto-population
+
+The file is automatically populated with all weapon materials found in the game. On first run, it will be created with default values for each weapon type.
+
+#### Format
+
+```yaml
+# Global defaults for all weapons
+defaults:
+  enabled: true  # Whether weapons are enabled by default
+  limit: 0       # Maximum number of this weapon type a player can have (0 = unlimited)
+
+# Per-weapon overrides
+weapons:
+  DIAMOND_SWORD:
+    enabled: true   # Whether this weapon can be used
+    limit: 1        # Maximum number of this weapon a player can have (0 = unlimited)
+  
+  BOW:
+    enabled: true
+    limit: 1
+    
+  # ... other weapons follow the same pattern
+```
+
+#### Enforcement
+
+1. **Disabled Weapons**:
+   - Players cannot attack with disabled weapons
+   - Players cannot shoot projectiles from disabled ranged weapons (bows, crossbows, tridents)
+   - Players cannot pick up or craft disabled weapons
+   - Attempting to use a disabled weapon shows a warning message
+
+2. **Weapon Limits**:
+   - Players cannot pick up weapons that would exceed their limit
+   - Players cannot craft weapons that would exceed their limit
+   - Players cannot use shift-click or drag to move weapons into their inventory if it would exceed limits
+   - A periodic sweep ensures limits are enforced even for admin-given items
+
+3. **Strict Inventory Enforcement**:
+   - Prevents bypassing limits through:
+     - Shift-clicking from containers
+     - Dragging items
+     - Hotbar swapping
+     - Any other inventory manipulation
+
+#### Commands
+
+- `/awc reload` - Reloads the weapons configuration
 
 ## Practical examples
 
