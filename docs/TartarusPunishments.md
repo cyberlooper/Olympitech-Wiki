@@ -14,7 +14,7 @@ It focuses on a simple workflow:
 Supported punishment types in code:
 
 - **BAN** (UUID ban + optional IP ban)
-- **MUTE** (blocks chat + command usage)
+- **MUTE** (blocks chat + command usage; only used if you define a reason preset with `punishmentType: mute`)
 - **PRISON** (teleport + freeze + return location)
 
 There is also a **Screenshare** feature that freezes a player and automatically bans them if they log out during the screenshare.
@@ -304,6 +304,8 @@ If this is not set, imprisoning will still store the prison record, but players 
 ## Examples
 
 ### Add a mute reason
+
+The default `config.yml` may not include any mute presets. To use mutes, add your own preset like the following.
 
 ```yaml
 ban-reasons:
