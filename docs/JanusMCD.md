@@ -13,7 +13,7 @@ It provides:
 - **Server status embeds** (auto-updating online/offline + players + TPS)
 - **Account linking + auth flows** (DM-based linking + login protections)
 - **Advancement and death notifications**
-- **Vanish & freeze utilities**
+- **Vanish & freeze utilities** (Packet-based hiding via ProtocolLib for true invisibility)
 - **Proximity Voice Chat** (Dynamic Discord channel management based on in-game location)
 
 ## Requirements
@@ -21,6 +21,7 @@ It provides:
 - **Minecraft server**: Spigot/Paper 1.16.5 or newer
 - **Java**: 17+
 - **Discord**: Bot token + permissions to read/send messages in configured channels
+- **ProtocolLib**: (Optional but Recommended) Required for robust packet-level vanish (hiding from tab-complete, server queries, etc.).
 
 ## Installation (Server Owners)
 
@@ -365,6 +366,8 @@ Interactions:
 
 - **`action-bar-message`** (string)
   - Set to empty string to disable the action bar message.
+
+> **Note**: For the most secure vanish experience (preventing tab-completion leaks, server list snooping, etc.), ensure **ProtocolLib** is installed. JanusMCD will automatically detect and use it for packet-level hiding.
 
 ## Examples
 
