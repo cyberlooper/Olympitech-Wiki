@@ -6,7 +6,7 @@ JanusMCD is a Minecraft server plugin (Spigot/Paper 1.16.5+) that bridges chat a
 
 It provides:
 
-- **Two-way chat relay** (Minecraft <-> Discord)
+- **Two-way chat relay** (Minecraft <-> Discord) with **Webhook Impersonation** support
 - **Multi-channel sync** (one Minecraft server to multiple Discord channels, with optional cross-Discord relay)
 - **Console relay + command execution** (optional)
 - **Filtering / anti-spam** controls for Discord-originated messages
@@ -14,6 +14,7 @@ It provides:
 - **Account linking + auth flows** (DM-based linking + login protections)
 - **Advancement and death notifications**
 - **Vanish & freeze utilities**
+- **Proximity Voice Chat** (Dynamic Discord channel management based on in-game location)
 
 ## Requirements
 
@@ -113,10 +114,20 @@ All configs live in `plugins/JanusMCD/`.
   - Discord bot token.
   - Use a placeholder in shared configs and never commit your real token.
 
-- **`channel-ids`** (list of strings)
-  - Discord channel IDs used for chat relay.
-  - Discord -> MC: messages from these channels come to Minecraft.
-  - MC -> Discord: Minecraft chat is sent to all these channels.
+- **`channel-ids`** (list mixed)
+  - Supports a mixed list of simple **Strings** (Legacy Bot Message) and **Objects** (Advanced Webhook).
+  - **String format**: `"123456789"`
+  - **Object format**:
+    ```yaml
+    - id: "123456789"
+      webhook-url: "https://discord.com/api/webhooks/..."
+      mode: "DISCORD" # MINECRAFT, DISCORD, HYBRID_MINECRAFT, HYBRID_DISCORD
+    ```
+  - **Modes**:
+    - `MINECRAFT`: Uses player's IGN and Skin.
+    - `DISCORD`: Uses linked Discord user's Display Name and Avatar (fallback to MC if unlinked).
+    - `HYBRID_MINECRAFT`: MC identity + footer `Linked as @DiscordUser`.
+    - `HYBRID_DISCORD`: Discord identity + footer `IGN: PlayerName`.
 
 - **`cross-discord-sync`** (bool, default `true`)
   - If `true`, a message received in one relay channel is re-posted to the other relay channels.
@@ -216,6 +227,9 @@ If no command channels are configured, JanusMCD falls back to `console-channel-i
 - **`join-leave-messages.show-player-avatar`** (bool)
 - **`join-leave-messages.avatar-url`** (string template)
   - Supports `{uuid}` and `{name}`.
+- **`join-leave-messages.avatar-location`** (string, default `thumbnail`)
+  - Controls where the avatar appears in the embed.
+  - Options: `thumbnail`, `author`, `both`, `none`.
 
 #### Server notifications
 
@@ -267,6 +281,26 @@ logging:
   messages:
     link-created: "🔗 **{player}** linked to <@{discord_id}>"
 ```
+
+### `voice.yml`
+
+Manages the Proximity Voice Chat (PVC) feature.
+
+- **`enabled`** (bool)
+- **`category-id`** (string)
+  - ID of the Discord category where transient voice channels will be created.
+  - Bot requires **Manage Channels** and **Move Members** permissions here.
+- **`lobby-channel-id`** (string)
+  - ID of the static voice channel where players must wait to be picked up.
+- **`proximity-radius`** (int blocks)
+- **`update-interval`** (int seconds; default `5`)
+  - How often to check locations. Lower = smoother but higher rate-limit risk.
+- **`mute-on-death`** (bool)
+  - Whether to server-mute players when they die in-game.
+- **`spectator-mode`**
+  - **`enabled`** (bool)
+  - **`channel-name`** (string)
+
 
 ### `advancements.yml`
 
@@ -356,6 +390,19 @@ channel-ids:
   - "222222222222222222" # Discord guild B
 
 cross-discord-sync: true
+```
+
+### Advanced Webhook Configuration
+
+```yaml
+channel-ids:
+  # Standard Bot Message Channel
+  - "111111111111111111"
+
+  # Webhook Channel (Impersonating Discord User)
+  - id: "222222222222222222"
+    webhook-url: "https://discord.com/api/webhooks/..."
+    mode: "DISCORD"
 ```
 
 ## Troubleshooting
