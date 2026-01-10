@@ -13,15 +13,15 @@ It provides:
 - **Server status embeds** (auto-updating online/offline + players + TPS)
 - **Account linking + auth flows** (DM-based linking + login protections)
 - **Advancement and death notifications**
-- **Vanish & freeze utilities** (Packet-based hiding via ProtocolLib for true invisibility)
-- **Proximity Voice Chat** (Dynamic Discord channel management based on in-game location)
+- **Stealth Vanish** (Packet-level hiding via ProtocolLib for true invisibility + Silent Chests)
+- **Proximity Voice Chat** (Location-based Discord voice channels with smart clustering)
 
 ## Requirements
 
 - **Minecraft server**: Spigot/Paper 1.16.5 or newer
 - **Java**: 17+
 - **Discord**: Bot token + permissions to read/send messages in configured channels
-- **ProtocolLib**: (Optional but Recommended) Required for robust packet-level vanish (hiding from tab-complete, server queries, etc.).
+- **ProtocolLib**: (Highly Recommended) Required for packet-level vanish (Silent Chests, Entity Hiding, Tab-Complete protection).
 
 ## Installation (Server Owners)
 
@@ -102,6 +102,12 @@ Status embeds are configured in `config.yml` as a list under `status-embeds`.
 
 - **Permission**: `janusmcd.vanish`
 - See vanished players: `janusmcd.vanish.see`
+- Bypass pickup restriction: `janusmcd.vanish.no-pickup.bypass`
+- Bypass interact restriction: `janusmcd.vanish.interact`
+
+### `/voice`
+- **Permission**: `janusmcd.voice` (future use)
+
 
 ## Configuration reference
 
@@ -288,22 +294,52 @@ logging:
 Manages the Proximity Voice Chat (PVC) feature.
 
 - **`enabled`** (bool)
-- **`category-id`** (string)
-  - ID of the Discord category where transient voice channels will be created.
-  - Bot requires **Manage Channels** and **Move Members** permissions here.
-- **`lobby-channel-id`** (string)
-  - ID of the static voice channel where players must wait to be picked up.
-- **`proximity-radius`** (int blocks)
-- **`update-interval`** (int seconds; default `5`)
-  - How often to check locations. Lower = smoother but higher rate-limit risk.
-- **`mute-on-death`** (bool)
-  - Whether to server-mute players when they die in-game.
-- **`spectator-mode`**
-  - **`enabled`** (bool)
-  - **`channel-name`** (string)
+- **`category-id`** (string, required)
+  - ID of the Discord **Category** where temporary voice channels will be created.
+  - Bot must have `Manage Channels`, `Move Members`, and `Mute Members` permissions here.
+- **`lobby-channel-id`** (string, required)
+  - ID of the static "Waiting Room" voice channel.
+  - Players must be in this channel to be picked up by the proximity system.
+- **`proximity-radius`** (int blocks, default `20`)
+  - Distance within which players can hear each other.
+- **`update-interval`** (int seconds, default `5`)
+  - How frequently clustering checks run.
+- **`mute-on-death`** (bool, default `true`)
+  - If `true`, players are server-muted in Discord while dead in-game.
+- **`channel-name-format`** (string, default `Voice Group %d`)
+  - Template for temporary channel names.
 
+**How it works:**
+1. Players join the **Lobby Channel** in Discord.
+2. JanusMCD tracks their in-game location.
+3. If players are within `proximity-radius` of each other, the bot moves them into a temporary **Voice Group** channel.
+4. When they move apart, they are returned to the Lobby or reassigned to new groups.
 
-### `advancements.yml`
+### `vanish.yml`
+
+Now powered by **ProtocolLib** for deep stealth.
+
+- **`enabled`** (bool)
+- **`vanish-on-join`** (bool)
+
+Suppression:
+- **`suppression.ingame-messages`** (bool): Hides Join/Quit messages.
+- **`suppression.discord-messages`** (bool): Hides Discord relay join/quit messages.
+- **`suppression.advancements`** (bool): Silences advancement announcements.
+- **`suppression.death-messages`** (bool): Hides death messages.
+
+Interactions:
+- **`interactions.prevent-item-pickup`** (bool)
+- **`interactions.prevent-mob-targeting`** (bool)
+- **`interactions.prevent-block-interaction`** (bool): Stops chest opening, button pressing, etc.
+- **`interactions.prevent-damage`** (bool): God mode while vanished.
+- **`interactions.prevent-physical-interactions`** (bool): Tripwires, pressure plates, crops.
+
+**Silent Chests**:
+When ProtocolLib is installed, opening chests/barrels/shulkers while vanished does NOT trigger opening animations or sounds for other players.
+
+- **`action-bar-message`** (string)
+  - Message shown to the vanished player (e.g., "&b&lVANISHED"). Set to empty to disable.
 
 - **`enabled`** (bool)
 - **`channel-id`** (string; empty uses first configured chat channel)
@@ -408,6 +444,20 @@ channel-ids:
     mode: "DISCORD"
 ```
 
+> **Warning**: When using Webhook configuration, you **MUST** use the `id: "CHANNEL_ID"` format.
+>
+> **Invalid YAML**:
+> ```yaml
+> - "123456789"
+>   webhook-url: "..." # ❌ Syntax Error: Cannot add keys to a string item
+> ```
+>
+> **Valid YAML**:
+> ```yaml
+> - id: "123456789"
+>   webhook-url: "..." # ✅ Correct: Item is an object
+> ```
+
 ## Troubleshooting
 
 ### “Discord token not set or invalid”
@@ -430,4 +480,15 @@ channel-ids:
 
 - Some settings are only read at startup.
 - Prefer a full server restart after significant changes.
+
+### Skin Resolution & Offline Support
+
+**Q: What if I use `HYBRID` or `DISCORD` mode but the player isn't linked?**
+A: The webhook will automatically fall back to **Minecraft** mode (showing the player's IGN and Skin).
+
+**Q: My server is in Offline/Cracked mode. Will heads work?**
+A: **Yes**, fully supported via **SkinsRestorer**.
+- JanusMCD detects SkinsRestorer (v14 and v15+) automatically.
+- It uses the player's *Skin Name* (set via `/skin`) to fetch the avatar, ensuring the webhook matches their visual appearance, not their Steve/Alex UUID.
+- Default `avatar-url` templates (e.g., `mc-heads.net`) support this out of the box.
 
