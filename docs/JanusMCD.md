@@ -42,12 +42,18 @@ It provides:
   - feature managers (account linking, auth, freeze, vanish, advancements, death messages, etc.)
   - `DiscordManager` which boots JDA asynchronously.
 
-When Discord is ready (`onDiscordReady`):
+### `account-linking.yml`
+*   `account-linking.enabled`
+*   `account-linking.require-verification`
+*   `account-linking.limits.max_links_per_discord`
+*   `logging.webhook`
 
-- Discord listeners are registered (chat relay, console processing, button interactions)
-- Discord slash commands are registered (link management)
-- Server startup notification is sent (if enabled)
-- Status embeds are started (if configured)
+### `voice.yml`
+*   `enabled`
+*   `category-id` (Discord Category ID for voice channels)
+*   `lobby-channel-id` (Main "waiting room" channel)
+*   `proximity-radius` (Distance to hear others)
+
 
 ### Config loading and reloads
 
@@ -104,9 +110,36 @@ Status embeds are configured in `config.yml` as a list under `status-embeds`.
 - See vanished players: `janusmcd.vanish.see`
 - Bypass pickup restriction: `janusmcd.vanish.no-pickup.bypass`
 - Bypass interact restriction: `janusmcd.vanish.interact`
+- Other permissions:
+    - `janusmcd.vanish.chat`: Allow chatting while vanished (if chat is otherwise blocked).
+    - `janusmcd.vanish.reload`: Reload vanish configuration.
+    - `janusmcd.vanish.other`: Toggle vanish for other players.
 
 ### `/voice`
-- **Permission**: `janusmcd.voice` (future use)
+
+> **Note**: There is no `/voice` command. Proximity Voice Chat works automatically by moving players in Discord based on their in-game location.
+
+### Link Management (Slash Commands)
+
+These commands are available as Discord Slash Commands (e.g., `/link status`).
+> **Multi-Server Support**: These commands are registered on **all** Discord servers the bot is in, but require strictly enforced permissions.
+
+*   **`/link status <user>`**
+    *   **Permission**: `MANAGE_SERVER` (Admin Only)
+    *   Checks the account link status for a Discord user.
+*   **`/link remove <user> <uuid>`**
+    *   **Permission**: `MANAGE_SERVER`
+    *   Removes a specific Minecraft account link from a Discord user.
+*   **`/link clear <user>`**
+    *   **Permission**: `MANAGE_SERVER`
+    *   Removes *all* Minecraft account links for a Discord user.
+
+### Reporting
+
+*   **`/report` (Slash Command)**
+    *   **Permission**: `MANAGE_SERVER` (Admin Only)
+    *   Generates a visual "Server Metrics Report" chart showing DAU (Daily Active Users), retention rates, average session length, and online player trends.
+
 
 
 ## Configuration reference
@@ -310,10 +343,12 @@ Manages the Proximity Voice Chat (PVC) feature.
   - Template for temporary channel names.
 
 **How it works:**
-1. Players join the **Lobby Channel** in Discord.
+1. Players join the **Lobby Channel** in Discord (configured in `voice.yml`).
 2. JanusMCD tracks their in-game location.
-3. If players are within `proximity-radius` of each other, the bot moves them into a temporary **Voice Group** channel.
+3. If players are within `proximity-radius` of each other, the bot **automatically** moves them into a temporary **Voice Group** channel.
 4. When they move apart, they are returned to the Lobby or reassigned to new groups.
+
+> **Note**: This feature is entirely automated. There are no in-game commands for players to run.
 
 ### `vanish.yml`
 

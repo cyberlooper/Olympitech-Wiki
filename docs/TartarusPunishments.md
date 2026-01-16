@@ -147,6 +147,51 @@ Important: each reason preset can specify its own permission level (admin/modera
 - Applies a screenshare freeze.
 - If they log out during the screenshare, the `screensharereject` punishment is applied.
 
+### `/checkpunishments <player>`
+
+- **Aliases**: `/checkp`, `/pcheck`, `/history`, `/phistory`
+- **Permission**: `tartarus.punishments.check`
+- Displays a comprehensive breakdown of:
+    - **Global Strikes**: Current count / Threshold.
+    - **Per-Reason History**: How many times they've violated a specific rule.
+    - **Scaling Status**: Shows their current "Step" in Fractal mode or progress in Linear mode.
+- **Punishment Scaling**:
+  - The plugin automatically tracks punishment history and can escalate penalties based on your configuration (e.g., Strike 1 -> Mute, Strike 2 -> Ban).
+
+## Punishment Scaling
+
+Tartarus Punishments supports three powerful scaling modes to automate discipline:
+
+### 1. Global Linear Scaling
+*   **Disabled by default**.
+*   Configured in `config.yml` under `punishment-scaling.global-linear`.
+*   A "Three Strikes" style system.
+*   **How it works**: Every time a player receives **any** punishment (warn, mute, prison, etc.), their global strike count increases. If they hit the `threshold`, the configured `action` (e.g., Ban) is applied for the `duration` (e.g., Permanent).
+
+### 2. Linear Mode (Per Reason)
+*   Configured inside a specific `ban-reason`.
+*   **Example**: "Spamming".
+*   If `mode: linear`, the plugin counts how many times the player has been punished for *this specific reason*.
+*   If they hit the `linear-threshold`, the `linear-action` (e.g., Ban) is applied instead of the default punishment.
+
+### 3. Fractal Mode (Per Reason)
+*   The most advanced mode.
+*   Configured inside a specific `ban-reason` by setting `mode: fractal`.
+*   You define a list of `steps`.
+*   **Example**:
+    *   Step 1: 1 hour Mute
+    *   Step 2: 12 hour Mute
+    *   Step 3: 7 day Ban
+    *   Step 4: Permanent Ban
+*   The plugin automatically checks the player's history for this reason and applies the next step in the ladder.
+
+## Integrations
+
+### JanusMCD
+Tartarus Punishments automatically detects if **JanusMCD** is installed.
+- It registers a **Ban Checker** with JanusMCD.
+- If you use JanusMCD's "Linked Accounts" feature, banning one account via Tartarus will automatically prevent all other linked accounts from joining the server (if JanusMCD is configured to enforce linked bans).
+
 ## Configuration reference (`config.yml`)
 
 Config file path on a live server:
@@ -197,11 +242,17 @@ Example reason:
 ban-reasons:
   spam:
     duration: 12h
-    punishmentType: ban
-    inventoryClear: false
-    reason: Repeatedly sending messages at rapid speeds
     customReason: ""
     permission: helper
+    # Scaling Options (Optional)
+    mode: "default" # "default", "linear", or "fractal"
+    # Example Fractal Config:
+    # mode: "fractal"
+    # steps:
+    #   - [mute, 1h]
+    #   - [mute, 12h]
+    #   - [ban, 7d]
+
 ```
 
 ### `ban-message`
